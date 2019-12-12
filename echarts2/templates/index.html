@@ -17,32 +17,42 @@
 
     myChart.setOption({
         title: {
-            text: '异步数据更新示例'
+            text: '服务器系统监控'
         },
         tooltip: {},
         legend: {
-            data:['蒸发量','降水量']
+            data:['cpu1','cpu2','cpu3','cpu4']
         },
         xAxis: {
             data: []
         },
         yAxis: {},
         series: [{
-            name: '蒸发量',
-            type: 'bar',
+            name: 'cpu1',
+            type: 'line',
             data: []
         },{
-            name: '降水量',
+            name: 'cpu2',
+            type: 'line',
+            data: []
+        },{
+            name: 'cpu3',
+            type: 'line',
+            data: []
+        },{
+            name: 'cpu4',
             type: 'line',
             data: []
         }]
     });
 
 
-    // 四个全局变量：月份、蒸发量、降水量、  哨兵（用于POST）
-    var month = [],
-        evaporation = [],
-        precipitation = [],
+    // 六个全局变量：插入时间、cpu1、cpu2、cpu3、cpu4、 哨兵（用于POST）
+    var insert_time = ["","","","","","","","","",""],
+        cpu1 = [0,0,0,0,0,0,0,0,0,0],
+        cpu2 = [0,0,0,0,0,0,0,0,0,0],
+        cpu3 = [0,0,0,0,0,0,0,0,0,0],
+        cpu4 = [0,0,0,0,0,0,0,0,0,0],
 
         lastID = 0; // 哨兵，记录上次数据表中的最后id +1（下次查询只要>=lastID）
 
@@ -52,25 +62,33 @@
 
         myChart.hideLoading(); // 隐藏加载动画
 
-        dataLength = data.month.length //取回的数据长度
-        lastID += dataLength //哨兵，相应增加。
+        dataLength = data.insert_time.length; //取回的数据长度
+        lastID += dataLength; //哨兵，相应增加。
 
         // 切片是能统一的关键！！
-        month = month.slice(dataLength).concat(data.month) // 数组，先切片、再拼接
-        evaporation = evaporation.slice(dataLength).concat(data.evaporation.map(parseFloat)) //注意map方法
-        precipitation = precipitation.slice(dataLength).concat(data.precipitation.map(parseFloat))
+        insert_time = insert_time.slice(dataLength).concat(data.insert_time); // 数组，先切片、再拼接
+        cpu1 = cpu1.slice(dataLength).concat(data.cpu1.map(parseFloat)); //注意map方法
+        cpu2 = cpu2.slice(dataLength).concat(data.cpu2.map(parseFloat));
+        cpu3 = cpu3.slice(dataLength).concat(data.cpu3.map(parseFloat));
+        cpu4 = cpu4.slice(dataLength).concat(data.cpu4.map(parseFloat));
 
         // 填入数据
         myChart.setOption({
             xAxis: {
-                data: month
+                data: insert_time
             },
             series: [{
-                name: '蒸发量', // 根据名字对应到相应的系列
-                data: evaporation
+                name: 'cpu1', // 根据名字对应到相应的系列
+                data: cpu1
             },{
-                name: '降水量',
-                data: precipitation
+                name: 'cpu2',
+                data: cpu2
+            },{
+                name: 'cpu3',
+                data: cpu3
+            },{
+                name: 'cpu4',
+                data: cpu4
             }]
         });
 
@@ -81,13 +99,13 @@
 
 
     // 异步加载数据 （首次，get，显示6个数据）
-    $.get('/weather').done(update_mychart);
+    $.get('/cpu').done(update_mychart);
 
 
     // 异步更新数据 （以后，定时post，取回1个数据）
     var timeTicket = setInterval(function () {
-        $.post('/weather',{id: lastID}).done(update_mychart);
-    }, 5000);
+        $.post('/cpu',{id: lastID}).done(update_mychart);
+    }, 3000);
 
     </script>
 </body>
